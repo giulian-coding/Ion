@@ -3,32 +3,18 @@ services:
     image: nats:alpine
     container_name: nats-server
     ports:
-      # Standard NATS TCP-Port (Hierüber verbindet sich dein Go-Backend)
       - "4222:4222"
-
-      # WebSocket-Port (Hierüber verbindet sich dein TypeScript-Frontend im Browser)
       - "9222:9222"
-
-      # HTTP-Monitoring (Ein einfaches Dashboard für den Server-Status)
       - "8222:8222"
-
     command:
-      # -js aktiviert JetStream (zwingend nötig für Queues, Retries und Persistenz)
-      - "-js"
-      # Verzeichnis, in dem JetStream seine Daten speichert
-      - "--sd"
-      - "/data"
-      # Aktiviert WebSockets auf Port 9222
-      - "--ws_port"
-      - "9222"
-      # Aktiviert das HTTP-Monitoring auf Port 8222
-      - "--http_port"
-      - "8222"
-
+      # Lade die Konfigurationsdatei
+      - "-c"
+      - "/etc/nats/nats.conf"
     volumes:
-      # Docker Volume, damit deine Queues bei einem Neustart nicht gelöscht werden
+      # Mounte unsere lokale nats.conf in den Container (Read-Only)
+      - ./nats.conf:/etc/nats/nats.conf:ro
+      # Volume für die JetStream Persistenz
       - nats-data:/data
-
     restart: unless-stopped
 
 volumes:
