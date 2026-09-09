@@ -1,4 +1,3 @@
-﻿// producer.go
 package main
 
 import (
@@ -7,14 +6,10 @@ import (
 	"fmt"
 	"log"
 
+	"Ion/internal/job"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
-
-type TestJob struct {
-	ID      string         `json:"id"`
-	Payload map[string]any `json:"payload"`
-}
 
 func main() {
 	nc, err := nats.Connect(nats.DefaultURL)
@@ -29,7 +24,6 @@ func main() {
 	}
 
 	ctx := context.Background()
-
 	streamConfig := jetstream.StreamConfig{
 		Name:      "WORKQUEUE",
 		Subjects:  []string{"jobs.backend"},
@@ -37,29 +31,29 @@ func main() {
 		Retention: jetstream.WorkQueuePolicy,
 	}
 
-	_, err = js.CreateOrUpdateStream(ctx, streamConfig)
-	if err != nil {
-		log.Fatalf("Fehler beim Erstellen des Streams: %v", err)
+	if _, err = js.CreateOrUpdateStream(ctx, streamConfig); err != nil {
+		log.Fatalf("error creating stream: %v", err)
 	}
-	fmt.Println("Stream erfolgreich verifiziert.")
+	log.Println("stream verified")
 
-	// Jobs pushen
-	for i := 1; i <= 5; i++ {
-		job := TestJob{
-			ID: fmt.Sprintf("test-job-%d", i),
+	for index := 1; index <= 5; index++ {
+		queuedJob := job.Job{
+			ID: fmt.Sprintf("test-job-%d", index),
 			Payload: map[string]any{
 				"task": "simulate_work",
 				"time": 3,
 			},
 		}
 
-		jobBytes, _ := json.Marshal(job)
-
-		_, err = js.Publish(ctx, "jobs.backend", jobBytes)
+		jobBytes, err := json.Marshal(queuedJob)
 		if err != nil {
-			log.Fatalf("Fehler beim Senden von Job %d: %v", i, err)
+			log.Fatalf("error encoding job %d: %v", index, err)
 		}
 
-		fmt.Printf("Job %s in die Queue geschickt.\n", job.ID)
+		if _, err = js.Publish(ctx, "jobs.backend", jobBytes); err != nil {
+			log.Fatalf("error publishing job %d: %v", index, err)
+		}
+
+		log.Printf("job %s published", queuedJob.ID)
 	}
 }
