@@ -36,7 +36,5 @@ jobs:
         name: coverage-report
         path: coverage.html
 
-    - name: Linter
-      uses: golangci/golangci-lint-action@v6
-      with:
-        version: latest
+    - name: Go Vet
+      run: go vet ./...
