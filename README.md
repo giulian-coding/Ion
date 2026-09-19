@@ -28,6 +28,14 @@ with services, infrastructure, automation, and assistant capabilities.
 	```bash
 	go run ./cmd/producer
 	```
+4. Setup authentication (Linux)
+	```bash
+	curl -L https://raw.githubusercontent.com/nats-io/nsc/main/install.py | python3
+	echo 'export PATH="$PATH:/home/codespace/.nsccli/bin"' >> $HOME/.bashrc
+	source $HOME/.bashrc
+	./init.sh
+	```
+
 
 The worker connects to NATS at `nats://localhost:4222`, creates the `WORKQUEUE`
 JetStream stream if necessary, and processes jobs from `jobs.backend`.
