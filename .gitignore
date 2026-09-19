@@ -1,2 +1,6 @@
 coverage.out
 coverage.html
+.env
+.env.*
+!.env.example
+*.creds

@@ -7,15 +7,49 @@ services:
       - "9222:9222"
       - "8222:8222"
     command:
-      # Lade die Konfigurationsdatei
       - "-c"
       - "/etc/nats/nats.conf"
     volumes:
-      # Mounte unsere lokale nats.conf in den Container (Read-Only)
       - ./nats.conf:/etc/nats/nats.conf:ro
-      # Volume für die JetStream Persistenz
       - nats-data:/data
+    environment:
+      SYS_PASSWORD: ${SYS_PASSWORD}
+      APP_PASSWORD: ${APP_PASSWORD}
+      WEB_PASSWORD: ${WEB_PASSWORD}
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost:8222/healthz" ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  worker:
+    build:
+      context: ..
+      dockerfile: ./infrastructure/worker/Dockerfile
+    env_file:
+      - .env
+    environment:
+      NATS_URL: nats://nats:4222
+    depends_on:
+      nats:
+        condition: service_healthy
+    restart: unless-stopped
+
+  producer:
+    build:
+      context: ..
+      dockerfile: ./infrastructure/producer/Dockerfile
+    env_file:
+      - .env
+    environment:
+      NATS_URL: nats://nats:4222
+    depends_on:
+      nats:
+        condition: service_healthy
+    restart: "no"
+    profiles: [ "tools" ]
 
 volumes:
   nats-data:

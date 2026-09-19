@@ -5,18 +5,36 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
+	"time"
 
 	"Ion/internal/job"
+
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
 func main() {
-	nc, err := nats.Connect(nats.DefaultURL)
-	if err != nil {
-		log.Fatal(err)
+	url := os.Getenv("NATS_URL")
+	if url == "" {
+		log.Fatal("NATS_URL not set")
 	}
-	defer nc.Close()
+
+	pass := os.Getenv("APP_PASSWORD")
+	if pass == "" {
+		log.Fatal("APP_PASSWORD not set")
+	}
+
+	nc, err := nats.Connect(url,
+		nats.UserInfo("backend", pass),
+		nats.RetryOnFailedConnect(true),
+		nats.MaxReconnects(-1),
+		nats.ReconnectWait(2*time.Second),
+	)
+	if err != nil {
+		log.Fatalf("nats connection failed: %v", err)
+	}
+	defer nc.Drain()
 
 	js, err := jetstream.New(nc)
 	if err != nil {

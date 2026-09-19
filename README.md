@@ -11,43 +11,22 @@ with services, infrastructure, automation, and assistant capabilities.
 
 ## Getting Started
 
-1. Start the infrastructure services:
+1. Set the folllowing environment Variables for your containers:
+   SYS_PASSWORD, APP_PASSWORD, WEB_PASSWORD
 
-	```bash
-	docker compose -f infrastructure/docker-compose.yaml up -d
-	```
+2. Start the infrastructure services:
 
-2. Start the worker manually:
-
-	```bash
-	go run ./cmd/worker
-	```
-
-3. In a second terminal, publish the sample jobs manually:
-
-	```bash
-	go run ./cmd/producer
-	```
-4. Setup authentication (Linux)
-	```bash
-	curl -L https://raw.githubusercontent.com/nats-io/nsc/main/install.py | python3
-	echo 'export PATH="$PATH:/home/codespace/.nsccli/bin"' >> $HOME/.bashrc
-	source $HOME/.bashrc
-	./init.sh
-	```
-
-
-The worker connects to NATS at `nats://localhost:4222`, creates the `WORKQUEUE`
-JetStream stream if necessary, and processes jobs from `jobs.backend`.
+    ```bash
+    docker compose -f infrastructure/docker-compose.yaml up -d
+    ```
 
 To stop the infrastructure:
 
-```bash
-docker compose -f infrastructure/docker-compose.yaml down
-```
+   ```bash
+  docker compose -f infrastructure/docker-compose.yaml down
+   ```
 
 ## Project Structure
-
 ```text
 .
 ├── cmd/
@@ -61,12 +40,7 @@ docker compose -f infrastructure/docker-compose.yaml down
 └── README.md
 ```
 
-## Current Status
-
-The services must currently be started manually with `go run`. Automated
-application startup, service orchestration, and additional assistant modules
-are planned for future iterations.
-
 ## TODOs
 - [ ] Implement actual functionality based on Job Types
 - [ ] Implement Golang Testing Cases
+- [x] Implement Read Only Queues
