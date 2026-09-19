@@ -39,8 +39,3 @@ To stop the infrastructure:
 ├── go.mod
 └── README.md
 ```
-
-## TODOs
-- [ ] Implement actual functionality based on Job Types
-- [ ] Implement Golang Testing Cases
-- [x] Implement Read Only Queues
